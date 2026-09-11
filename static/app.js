@@ -43,26 +43,41 @@ async function fetchTasks() {
   render();
 }
 
+async function reportIfFailed(res, actionLabel) {
+  if (res.ok) return true;
+  let detail = "";
+  try {
+    detail = (await res.json()).detail || "";
+  } catch {
+    // response wasn't JSON, ignore
+  }
+  alert(`${actionLabel} failed${detail ? ": " + detail : ""} (${res.status})`);
+  return false;
+}
+
 async function addTask(text, priority, category, deadline, repeat) {
-  await fetch(`${API_BASE}/tasks`, {
+  const res = await fetch(`${API_BASE}/tasks`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ text, priority, category, deadline: deadline || null, repeat }),
   });
+  await reportIfFailed(res, "Adding task");
   await fetchTasks();
 }
 
 async function patchTask(id, patch) {
-  await fetch(`${API_BASE}/tasks/${id}`, {
+  const res = await fetch(`${API_BASE}/tasks/${id}`, {
     method: "PATCH",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(patch),
   });
+  await reportIfFailed(res, "Updating task");
   await fetchTasks();
 }
 
 async function deleteTask(id) {
-  await fetch(`${API_BASE}/tasks/${id}`, { method: "DELETE" });
+  const res = await fetch(`${API_BASE}/tasks/${id}`, { method: "DELETE" });
+  await reportIfFailed(res, "Deleting task");
   await fetchTasks();
 }
 
@@ -72,7 +87,10 @@ async function toggleTask(id, done) {
 
 async function clearCompleted() {
   const done = tasks.filter((t) => t.done);
-  await Promise.all(done.map((t) => fetch(`${API_BASE}/tasks/${t.id}`, { method: "DELETE" })));
+  const results = await Promise.all(done.map((t) => fetch(`${API_BASE}/tasks/${t.id}`, { method: "DELETE" })));
+  for (const res of results) {
+    if (!(await reportIfFailed(res, "Clearing completed tasks"))) break;
+  }
   await fetchTasks();
 }
 
@@ -278,11 +296,12 @@ importFile.addEventListener("change", async () => {
     deadline: t.deadline || null,
     repeat: t.repeat || "none",
   }));
-  await fetch(`${API_BASE}/tasks/import`, {
+  const res = await fetch(`${API_BASE}/tasks/import`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(payload),
   });
+  await reportIfFailed(res, "Importing tasks");
   importFile.value = "";
   await fetchTasks();
 });
