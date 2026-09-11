@@ -10,7 +10,7 @@ app = Flask(
     static_folder=os.path.join(os.path.dirname(__file__), "..", "static"),
 )
 
-DATABASE_URL = os.environ["POSTGRES_URL"]
+DATABASE_URL = os.environ.get("DATABASE_URL") or os.environ["POSTGRES_URL"]
 
 
 def get_db():
