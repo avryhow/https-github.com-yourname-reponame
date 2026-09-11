@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Todo</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  <main>
+    <h1>Todo</h1>
+
+    <form action="{{ url_for('add') }}" method="post" class="add-form">
+      <input type="text" name="text" placeholder="Add a task..." autofocus required>
+      <button type="submit">Add</button>
+    </form>
+
+    <ul class="todo-list">
+      {% for todo in todos %}
+      <li class="{{ 'done' if todo.done else '' }}">
+        <form action="{{ url_for('toggle', todo_id=todo.id) }}" method="post">
+          <button type="submit" class="toggle-btn" aria-label="Toggle done">{{ '☑' if todo.done else '☐' }}</button>
+        </form>
+        <span class="text">{{ todo.text }}</span>
+        <form action="{{ url_for('delete', todo_id=todo.id) }}" method="post">
+          <button type="submit" class="delete-btn" aria-label="Delete">✕</button>
+        </form>
+      </li>
+      {% else %}
+      <li class="empty">No tasks yet — add one above.</li>
+      {% endfor %}
+    </ul>
+  </main>
+</body>
+</html>
