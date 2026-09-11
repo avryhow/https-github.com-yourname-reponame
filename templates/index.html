@@ -1,35 +1,66 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8">
+  <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Todo</title>
+  <title>To-Do List</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
-  <main>
-    <h1>Todo</h1>
-
-    <form action="{{ url_for('add') }}" method="post" class="add-form">
-      <input type="text" name="text" placeholder="Add a task..." autofocus required>
-      <button type="submit">Add</button>
+  <main class="app">
+    <div class="app-header">
+      <h1>To-Do List</h1>
+      <div class="header-actions">
+        <button id="export-btn" type="button" title="Export tasks as JSON">🐱 Export</button>
+        <button id="import-btn" type="button" title="Import tasks from JSON">🐱 Import</button>
+        <input type="file" id="import-file" accept="application/json" hidden>
+        <button id="theme-toggle-btn" type="button" title="Toggle dark/light mode">🌙</button>
+      </div>
+    </div>
+    <form id="add-form" autocomplete="off">
+      <input type="text" id="task-input" placeholder="What needs to be done?" required>
+      <input type="datetime-local" id="deadline-input" title="Deadline (optional)">
+      <select id="priority-input">
+        <option value="high">High</option>
+        <option value="medium" selected>Medium</option>
+        <option value="low">Low</option>
+      </select>
+      <select id="category-input">
+        <option value="personal" selected>Personal</option>
+        <option value="work">Work</option>
+      </select>
+      <select id="repeat-input" title="Repeat">
+        <option value="none" selected>No repeat</option>
+        <option value="daily">Repeats daily</option>
+        <option value="weekly">Repeats weekly</option>
+      </select>
+      <button type="submit">🐱 Add</button>
     </form>
+    <div class="category-tabs" id="category-tabs">
+      <button type="button" class="category-tab active" data-category="all">All</button>
+      <button type="button" class="category-tab" data-category="personal">Personal</button>
+      <button type="button" class="category-tab" data-category="work">Work</button>
+    </div>
+    <h2 class="section-title">Open <span class="hint">(drag to reorder)</span></h2>
+    <ul id="open-list" class="task-list"></ul>
 
-    <ul class="todo-list">
-      {% for todo in todos %}
-      <li class="{{ 'done' if todo.done else '' }}">
-        <form action="{{ url_for('toggle', todo_id=todo.id) }}" method="post">
-          <button type="submit" class="toggle-btn" aria-label="Toggle done">{{ '☑' if todo.done else '☐' }}</button>
-        </form>
-        <span class="text">{{ todo.text }}</span>
-        <form action="{{ url_for('delete', todo_id=todo.id) }}" method="post">
-          <button type="submit" class="delete-btn" aria-label="Delete">✕</button>
-        </form>
-      </li>
-      {% else %}
-      <li class="empty">No tasks yet — add one above.</li>
-      {% endfor %}
-    </ul>
+    <h2 class="section-title">Completed</h2>
+    <ul id="completed-list" class="task-list"></ul>
+
+    <button id="clear-done-btn" type="button">🐱 Clear completed</button>
   </main>
+
+  <div id="qr-modal" class="qr-modal" hidden>
+    <div class="qr-modal-content">
+      <button id="qr-close-btn" type="button" class="qr-close-btn" aria-label="Close">✕</button>
+      <p id="qr-task-text"></p>
+      <div id="qr-canvas-wrap"></div>
+      <p class="qr-hint">Scan to mark this task complete</p>
+      <p id="qr-link" class="qr-link"></p>
+    </div>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <script src="{{ url_for('static', filename='app.js') }}"></script>
 </body>
 </html>

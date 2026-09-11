@@ -1,6 +1,6 @@
 # Todo (Flask + Vercel Postgres)
 
-A minimal, server-rendered todo app: one Flask route file, plain HTML forms, no JS.
+A Flask + Vercel Postgres todo app with the full feature set of the original `todo-app` project (priority, category, deadline, daily/weekly repeat, drag-to-reorder, dark/light theme, JSON export/import, per-task QR-code complete links), served as a single-page frontend backed by a same-origin JSON API (`/tasks`).
 
 ## Deploy
 
